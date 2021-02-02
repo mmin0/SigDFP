@@ -11,6 +11,11 @@ import sys
 import os
 import numpy as np
 
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--depth', type=int, help='signature depth', required=True)
+args = parser.parse_args()
+
 torch.manual_seed(21)
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -34,7 +39,7 @@ for i in range(1, N+1):
 initial_generator = torch.rand
 initial = initial_generator(B, 1)
 
-depth = 2
+depth = args.depth
 rough_w0 = signatory.Path(augment(w0), depth, basepoint=False) # rough path
 
 dic = {"in_dim": 5, "out_dim":1, "neurons":[64, 32, 32, 16]}
