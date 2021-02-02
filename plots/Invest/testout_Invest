@@ -1,0 +1,10 @@
+-----------------------------
+----------Test Data----------
+-----------------------------
+Loss on test data:  0.9489691369235516
+The L2 distance between controlled SDE on test data:  0.22943155467510223
+The L2 (relative) distance between controlled SDE on test data:  0.06844476583429324
+The L2 distance between Xbar on test data:  0.08779259771108627
+The L2 (relative) distance between Xbar on test data:  0.03480543600460356
+The L2 distance between pi on test data:  0.8235664963722229
+The L2 (relative) distance between pi on test data:  0.08494766121273103

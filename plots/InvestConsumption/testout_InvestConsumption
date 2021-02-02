@@ -1,0 +1,14 @@
+-----------------------------
+----------Test Data----------
+-----------------------------
+Loss on test data:  -2.591998517513275
+The L2 distance between controlled SDE on test data:  2.5497896671295166
+The L2 (relative) distance between controlled SDE on test data:  0.8550724556568694
+The L2 distance between cost c on test data:  0.06147429347038269
+The L2 (relative) distance between cost c on test data:  0.06149307066208135
+The L2 distance between gamma on test data:  0.010780667886137962
+The L2 (relative) distance between gamma on test data:  0.012127916226600971
+The L2 distance between Xbar on test data:  0.008984778076410294
+The L2 (relative) distance between Xbar on test data:  0.02785122526623781
+The L2 distance between pi on test data:  0.29373371601104736
+The L2 (relative) distance between pi on test data:  0.11258878299950349
