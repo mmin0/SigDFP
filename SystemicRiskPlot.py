@@ -14,7 +14,7 @@ import numpy as np
 
 torch.manual_seed(521)
 
-device = torch.device('cuda:3' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 augment = signatory.Augment(1, 
                             layer_sizes = (), 

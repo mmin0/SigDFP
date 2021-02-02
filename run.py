@@ -16,9 +16,16 @@ import numpy as np
 
 
 torch.manual_seed(521)
-case = "SystemicRisk" #SystemicRisk, Invest, InvestConsumption
 
-device = torch.device('cuda:3' if torch.cuda.is_available() else 'cpu')
+parser = argparse.ArgumentParser()
+parser.add_argument('--case', help='name of example', required=True)
+parser.add_argument('--depth', type=int, help='signature depth', required=True)
+args = parser.parse_args()
+
+case = args.case #SystemicRisk, Invest, InvestConsumption
+depth = args.depth
+
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 augment = signatory.Augment(1, 
                             layer_sizes = (), 
@@ -54,7 +61,7 @@ initial_valid = initial_generator(B_valid, 1)
 
 
 if case == 'SystemicRisk':
-    depth = 2
+    
     rough_w0 = signatory.Path(augment(w0), depth, basepoint=False) # rough path
     rough_w0_valid = signatory.Path(augment(w0_valid), depth, basepoint=False)
     print("Example: SystemicRisk")
@@ -151,7 +158,7 @@ if case == 'SystemicRisk':
 
 
 if case == 'Invest':
-    depth = 2
+    
     rough_w0 = signatory.Path(augment(w0), depth, basepoint=False) # rough path
     rough_w0_valid = signatory.Path(augment(w0_valid), depth, basepoint=False)
     print("Example: Invest")
@@ -261,7 +268,7 @@ if case == 'Invest':
     
     
 if case == "InvestConsumption":
-    depth = 4
+    
     rough_w0 = signatory.Path(augment(w0), depth, basepoint=False) # rough path
     rough_w0_valid = signatory.Path(augment(w0_valid), depth, basepoint=False)
     print("Example: InvestConsumption")
@@ -381,4 +388,4 @@ if case == "InvestConsumption":
     with open(sys.path[0]+'/output/valid_util_InvestConsumption.npy', 'wb') as f:
         np.save(f, np.array(valid_util))
     
-   
+print("Training Done!")
