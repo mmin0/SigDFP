@@ -17,4 +17,6 @@ python3 run.py --case SystemicRisk --depth 2
 Plots can be done by
 ```
 python3 SystemicRiskPlot.py --depth 2
+python3 InvestPlot.py --depth 2
+python3 InvestConsumptionPlot.py --depth 4
 ```
