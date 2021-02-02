@@ -75,8 +75,7 @@ if case == 'SystemicRisk':
     m_valid = torch.randn(B, N+1, 1, device=device)+2
 
     benchmark = mode.benchmark(bm, w0, initial)
-    benchmark_test = mode.benchmark(bm_test, w0_test, initial_test)
-    benchmark_loss = mode.benchmark_loss(initial_test)
+    benchmark_loss = mode.benchmark_loss(initial)
     print("Benchmark loss: ", benchmark_loss)
     target_addr = sys.path[0]+'/output'
 
