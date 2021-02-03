@@ -17,7 +17,7 @@ args = parser.parse_args()
 
 torch.manual_seed(21)
 
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
 augment = signatory.Augment(1, 
                             layer_sizes = (), 
                             kernel_size = 1,
@@ -95,13 +95,13 @@ print("The L2 (relative) distance between controlled SDE on test data: ",
 title = None
 name = "SDE"
 utils.plotSDE(benchmark[:3].cpu().detach().numpy(), X[:3, :, 1:].cpu().detach().numpy(),
-                  target_addr, title, name, label1=r"$X_t$", label2=r"$\hat{X}_t$")
+                  target_addr, title, name, label1=r"$X_t$", label2=r"$\widehat{X}_t$")
 
 utils.plotMeanDiff_bencmarkvspredicted([[i/N for i in range(N+1)], benchmark_m[:3, :].cpu().detach().numpy(),
                         m[:3, :].cpu().detach().numpy()],
                         target_addr, 
-                        None, 'Xbar', label1=r"$m_t$", label2=r"$\hat{m}_t$",
-                        ylabel=r"$m_t$ and $\hat{m}_T$")
+                        None, 'Xbar', label1=r"$m_t$", label2=r"$\widehat{m}_t$",
+                        ylabel=r"$m_t$ and $\widehat{m}_t$")
 print("The L2 distance between Xbar on test data: ", 
           utils.L2distance(benchmark_m.view(B, -1, 1), m.cpu().view(B, -1, 1)))
 print("The L2 (relative) distance between Xbar on test data: ", 
@@ -112,7 +112,7 @@ pi = torch.cat([pi for i in range(N)], dim=1)
 title = None
 name = "pi"
 utils.plotpi(pi[:3].cpu().detach().numpy(), pi_pred[:3].cpu().detach().numpy(), 
-                  target_addr, title, name, label1=r"$\pi_t$", label2=r"$\hat{\pi}_t$", ylabel=r"$\pi_t$ and $\hat{pi}_t$")
+                  target_addr, title, name, label1=r"$\pi_t$", label2=r"$\widehat{\pi}_t$", ylabel=r"$\pi_t$ and $\widehat{\pi}_t$", legendloc="best")
 
 print("The L2 distance between pi on test data: ", 
           utils.L2distance(pi.view(B, -1, 1), pi_pred.cpu().view(B, -1, 1)))
