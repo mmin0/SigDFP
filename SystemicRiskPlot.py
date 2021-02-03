@@ -17,7 +17,7 @@ args = parser.parse_args()
 
 torch.manual_seed(21)
 
-device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 augment = signatory.Augment(1, 
                             layer_sizes = (), 
