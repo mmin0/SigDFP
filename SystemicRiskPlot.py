@@ -86,7 +86,7 @@ print("The L2 (relative) distance between controlled SDE on test data: ",
 title = None #"Controlled SDE: Benchmark vs. Predicted"
 name = "SDE"
 utils.plotSDE(benchmark[:3].cpu().detach().numpy(), X[:3, :, 1:].cpu().detach().numpy(),
-                  target_addr, title, name,
+                  target_addr, title, name, ylim=(0.25, 0.75),
                   label1 = r"$X_t$", label2 = r"$\hat{X}_t$")
 
 benchmark_m = (torch.mean(initial)+w0*params["sigma"]*params["rho"]).view(B, -1, 1)
@@ -97,13 +97,14 @@ print("The L2 (relative) distance between Xbar on test data: ",
 
 utils.plotMeanDiff_bencmarkvspredicted([[i/N for i in range(N+1)], m[:3, :].cpu().detach().numpy(),
                         benchmark_m[:3]],
-                        target_addr, None, 'mt', ylim=(0.45, 0.6),
-                        label1 = r"$m_t$" , label2 = r"$\hat{m}_t$", ylabel=r"$m_t$")
+                        target_addr, None, 'mt', ylim=(0.44, 0.6),
+                        label1 = r"$m_t$" , label2 = r"$\hat{m}_t$", ylabel=r"$m_t$ and $\hat{m}_t$")
 
 errors = np.load(os.path.join(params_path, "errors_SystemicRisk.npy"))
 valid_util = np.load(os.path.join(params_path, "valid_util_SystemicRisk.npy"))
 #utils.plotErrors(errors, target_addr, "", "")
-utils.plotUtil(valid_util, (0, 0.05), benchmark_loss, target_addr, "Validation Cost", "valid_cost")
+utils.plotUtil(valid_util, (0, 0.05), benchmark_loss, target_addr, None, "valid_cost",
+               ins_loc=[0.55, 0.55, 0.25, 0.25], ins_ylim=(benchmark_loss-0.0005, benchmark_loss+0.001))
 
 print("The L2 distance between pi on test data: ", 
           utils.L2distance(benchmark_alpha.view(B, -1, 1), predicted_alpha.cpu().view(B, -1, 1)))
@@ -111,7 +112,7 @@ print("The L2 (relative) distance between pi on test data: ",
           utils.L2distance(benchmark_alpha.view(B, -1, 1), predicted_alpha.cpu().view(B, -1, 1))/utils.L2distance(benchmark_alpha.view(B, -1, 1), torch.zeros(B, N, 1)))
 
 utils.plotpi(benchmark_alpha[:3], predicted_alpha[:3], target_addr, None, #r"$\alpha_t$: Benchmark vs. Predicted", 
-             "alpha", label1 = r"$\alpha_t$", label2 = r"$\hat{\alpha}_t$", ylabel=r"$\alpha_t$")
+             "alpha", label1 = r"$\alpha_t$", label2 = r"$\hat{\alpha}_t$", ylabel=r"$\alpha_t$ and $\hat{\alpha}$")
 f.close()
 
 

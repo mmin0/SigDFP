@@ -5,12 +5,15 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.legend_handler import HandlerTuple
 #from tqdm import tqdm
 
 plt.rc('xtick', labelsize=12)    # fontsize of the tick labels
 plt.rc('ytick', labelsize=12)
 plt.rc('legend', fontsize=20) 
 plt.rc('axes', labelsize=20)
+plt.rcParams["figure.figsize"] = (7.5, 5)
+colors = ['lightcoral', 'mediumseagreen', 'darkorange']
 
 def epoch_time(start_time, end_time):
     elap_time = end_time - start_time
@@ -200,22 +203,44 @@ def plotErrors(error, target_addr, title, filename):
     plt.plot(error, color='blue')
     fig.savefig(target_addr+'/'+filename+'.pdf')
     
-def plotUtil(util, ylim, ytrue, target_addr, title, filename):
+def plotUtil(util, ylim, ytrue, target_addr, title, filename, ins_loc=None, ins_ylim=None):
+    '''
     fig = plt.figure()
     if title:
         plt.title(title)
     if ylim:
         plt.ylim(ylim)
-    plt.xlabel("FP rounds")
-    plt.ylabel("Utility")
-    plt.axhline(ytrue, color="indianred", ls="-", label="true utility")
-    plt.plot(util, color='darkcyan', ls="--", label="valid utility")
+    plt.xlabel(r"FP iterations $n$")
+    plt.ylabel("validation utility")
+    plt.axhline(ytrue, color="indianred", ls="--", label="true utility")
+    plt.plot(util, color='darkcyan', ls="-", label="valid utility")
     plt.legend() #loc="center right"
+    fig.savefig(target_addr+'/'+filename+'.pdf')
+    '''
+    n = len(util)
+    fig, ax = plt.subplots(figsize=(7.5, 5))
+    if title:
+        plt.title(title)
+    if ylim:
+        ax.set_ylim(ylim)
+    ax.set_xlabel(r"FP iterations $n$")
+    ax.set_ylabel("validation utility")
+    l1 = ax.axhline(ytrue, color="indianred", ls="--")
+    l2, = ax.plot(util, color='darkcyan', ls="-")
+    if ins_loc:
+        axins = ax.inset_axes(ins_loc)
+    if ins_ylim:
+        axins.set_ylim(ins_ylim)
+    axins.plot(range(n-200, n), util[-200:], color='darkcyan', ls="-")
+    axins.axhline(ytrue, color="indianred", ls="--")
+    
+    ax.indicate_inset_zoom(axins)
+    ax.legend((l1, l2), ("true utility", "valid utility"), loc="upper left", ncol=2)
     fig.savefig(target_addr+'/'+filename+'.pdf')
 
 
 
-
+'''
 def plotMeanDiff(data, target_addr, title, filename):
     fig = plt.figure()
     plt.title(title)
@@ -228,6 +253,7 @@ def plotMeanDiff(data, target_addr, title, filename):
     plt.legend()
     #plt.ylim(-0.2, 0.2)
     fig.savefig(target_addr+'/'+filename+'.pdf')
+    '''
     
 
 def plotMeanDiff_bencmarkvspredicted(data, target_addr, title, filename, ylim=None, label1=None, label2=None, ylabel=None):
@@ -237,21 +263,22 @@ def plotMeanDiff_bencmarkvspredicted(data, target_addr, title, filename, ylim=No
     x, next_m, m = data
     if ylim:
         plt.ylim(ylim)
-    for p in next_m:
-        if label1:
-            plt.plot(x, p, color='indianred', label=label1)
-        else:
-            plt.plot(x, p, color='indianred', label='Benchmark')
-    for p in m:
-        if label2:
-            plt.plot(x, p, color='grey', label=label2, ls='--')
-        else:
-            plt.plot(x, p, color='grey', label='Predicted', ls='--')
+    c = len(next_m)
+    lines = []
+    lines_pred = []
+    for i in range(c):
+        l, = plt.plot(x, next_m[i], color=colors[i])
+        lines.append(l)
+    for i in range(c):
+        l, = plt.plot(x, m[i], color=colors[i], ls='--', marker='.')
+        lines_pred.append(l)
     #plt.plot(x, next_m-m, label='diff')
-    plt.xlabel(r"$t$")
+    plt.xlabel(r"time $t$")
     if ylabel:
         plt.ylabel(ylabel)
-    plt.legend()
+    plt.legend([tuple(lines), tuple(lines_pred)], [label1, label2], 
+                loc="upper left", ncol=2, handler_map={tuple: HandlerTuple(ndivide=None)})
+    #plt.legend(lines_pred, r"$\hat{m}_t$")
     #plt.ylim(-0.2, 0.2)
     fig.savefig(target_addr+'/'+filename+'.pdf')
     
@@ -260,7 +287,7 @@ def L2distance(x, y):
     b, N, _ = x.size()
     return ((torch.sum(torch.pow(x - y, 2))/N/b)**0.5).item()
 
-def plotSDE(benchmark, predicted, target_addr, title, filename, label1=None, label2=None):
+def plotSDE(benchmark, predicted, target_addr, title, filename, ylim=None, label1=None, label2=None):
     """
     input:
         benchmark -- list[paths]
@@ -269,22 +296,25 @@ def plotSDE(benchmark, predicted, target_addr, title, filename, label1=None, lab
     fig = plt.figure()
     if title:
         plt.title(title)
+    if ylim:
+        plt.ylim(ylim)
     t = [i/100 for i in range(101)]
-    for p in benchmark:
-        if label1:
-            plt.plot(t, p, color='indianred', ls='-', label=label1)
-        else:
-            plt.plot(t, p, color='indianred', ls='-', label="benchmark")
-    for p in predicted:
-        if label2:
-            plt.plot(t, p, color='grey', ls='--', label=label2)
-        else:
-            plt.plot(t, p, color='grey', ls='--', label="predicted SDE")
-    plt.legend()
-    plt.xlabel(r"$t$")
-    plt.ylabel(r"$X_t$")
+    c = len(benchmark)
+    lines = []
+    lines_pred = []
+    for i in range(c):
+        l, = plt.plot(t, benchmark[i], color=colors[i], ls='-')
+        lines.append(l)
+    for i in range(c):
+        l, = plt.plot(t, predicted[i], color=colors[i], ls='--', marker='.')
+        lines_pred.append(l)
+    plt.legend([tuple(lines), tuple(lines_pred)], [label1, label2], 
+                loc="upper left", ncol=2, handler_map={tuple: HandlerTuple(ndivide=None)})
+    plt.xlabel(r"time $t$")
+    plt.ylabel(r"$X_t$ and $\hat{X}_t$")
     fig.savefig(target_addr+'/'+filename+'.pdf')
     
+'''    
 def plotSDE_CI(benchmark, predicted, target_addr, title, filename):
     """
     input:
@@ -304,6 +334,7 @@ def plotSDE_CI(benchmark, predicted, target_addr, title, filename):
         plt.fill_between(t_axis, predicted[i].squeeze()-1.96*std, predicted[i].squeeze()+1.96*std, color='grey', alpha=0.1)
     plt.legend()
     fig.savefig(target_addr+'/'+filename+'SDE_CI.pdf')
+    '''
     
 def plotC(benchmark, predicted, target_addr, title, filename, label1=None, label2=None, ylabel=None):
     """
@@ -315,20 +346,20 @@ def plotC(benchmark, predicted, target_addr, title, filename, label1=None, label
     fig = plt.figure()
     if title:
         plt.title(title)
-    for p in benchmark:
-        if label1:
-            plt.plot(t, p, color='indianred', ls='-', label=label1)
-        else:
-            plt.plot(t, p, color='indianred', ls='-', label="benchmark")
-    for p in predicted:
-        if label2:
-            plt.plot(t, p, color='grey', ls='--', label=label2)
-        else:
-            plt.plot(t, p, color='grey', ls='--', label="predicted")
-    plt.xlabel(r"$t$")
+    c = len(benchmark)
+    lines = []
+    lines_pred = []
+    for i in range(c):
+        l, = plt.plot(t, benchmark[i], color=colors[i], ls='-')
+        lines.append(l)
+    for i in range(c):
+        l, = plt.plot(t, predicted[i], color=colors[i], ls='--', marker='.')
+        lines_pred.append(l)
+    plt.legend([tuple(lines), tuple(lines_pred)], [label1, label2], 
+                loc="upper left",ncol=2, handler_map={tuple: HandlerTuple(ndivide=None)})
+    plt.xlabel(r"time $t$")
     if ylabel:
         plt.ylabel(ylabel)
-    plt.legend()
     fig.savefig(target_addr+'/'+filename+'.pdf')
     
 def plotpi(benchmark, predicted, target_addr, title, filename, label1=None, label2=None, ylabel=None):
@@ -341,18 +372,18 @@ def plotpi(benchmark, predicted, target_addr, title, filename, label1=None, labe
     if title:
         plt.title(title)
     t = [i/100 for i in range(100)]
-    for p in benchmark:
-        if label1:
-            plt.plot(t, p, color='indianred', ls='-', label=label1)
-        else:
-            plt.plot(t, p, color='indianred', ls='-', label="benchmark")
-    for p in predicted:
-        if label2:
-            plt.plot(t, p, color='grey', ls='--', label=label2)
-        else:
-            plt.plot(t, p, color='grey', ls='--', label=predicted)
-    plt.legend()
-    plt.xlabel(r"$t$")
+    c = len(benchmark)
+    lines = []
+    lines_pred = []
+    for i in range(c):
+        l, = plt.plot(t, benchmark[i], color=colors[i], ls='-')
+        lines.append(l)
+    for i in range(c):
+        l, = plt.plot(t, predicted[i], color=colors[i], ls='--', marker='.')
+        lines_pred.append(l)
+    plt.legend([tuple(lines), tuple(lines_pred)], [label1, label2], 
+                loc="upper left", ncol=2, handler_map={tuple: HandlerTuple(ndivide=None)})
+    plt.xlabel(r"time $t$")
     if ylabel:
         plt.ylabel(ylabel)
     fig.savefig(target_addr+'/'+filename+'.pdf')
@@ -365,22 +396,24 @@ def plotmC(benchmark, predicted, target_addr, title, filename, label1=None, labe
         predicted -- list[paths]
     """
     N = predicted.shape[1]
-    t_axis = [1/N*i for i in range(N)]
+    t = [1/N*i for i in range(N)]
     fig = plt.figure()
     if title:
         plt.title(title)
-    if label1:
-        plt.plot(t_axis, benchmark, color='indianred', ls='-', label=label1)
-    else:
-        plt.plot(t_axis, benchmark, color='indianred', ls='-', label="benchmark")
-    for p in predicted:
-        if label2:
-            plt.plot(t_axis, p, color='grey', ls='--', label=label2)
-        else:
-            plt.plot(t_axis, p, color='grey', ls='--', label="predicted")
-    plt.xlabel(r"t")
+    
+    c = len(predicted)
+    lines = []
+    lines_pred = []
+    l, = plt.plot(t, benchmark, color='darkgrey', ls='-')
+    lines.append(l)
+    for i in range(c):
+        l, = plt.plot(t, predicted[i], color=colors[i], ls='--', marker='.')
+        lines_pred.append(l)
+    plt.legend([tuple(lines), tuple(lines_pred)], [label1, label2], 
+                loc="upper left", ncol=2, handler_map={tuple: HandlerTuple(ndivide=None)})
+    
+    plt.xlabel(r"time $t$")
     if ylabel:
         plt.ylabel(r"$\Gamma_t$")
-    plt.legend()
     fig.savefig(target_addr+'/'+filename+'.pdf')
     

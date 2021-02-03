@@ -11,7 +11,6 @@ import sys
 import os
 import numpy as np
 
-
 parser = argparse.ArgumentParser()
 parser.add_argument('--depth', type=int, help='signature depth', required=True)
 args = parser.parse_args()
@@ -102,7 +101,7 @@ utils.plotMeanDiff_bencmarkvspredicted([[i/N for i in range(N+1)], benchmark_m[:
                         m[:3, :].cpu().detach().numpy()],
                         target_addr, 
                         None, 'Xbar', label1=r"$m_t$", label2=r"$\hat{m}_t$",
-                        ylabel=r"$m_t$")
+                        ylabel=r"$m_t$ and $\hat{m}_T$")
 print("The L2 distance between Xbar on test data: ", 
           utils.L2distance(benchmark_m.view(B, -1, 1), m.cpu().view(B, -1, 1)))
 print("The L2 (relative) distance between Xbar on test data: ", 
@@ -113,7 +112,7 @@ pi = torch.cat([pi for i in range(N)], dim=1)
 title = None
 name = "pi"
 utils.plotpi(pi[:3].cpu().detach().numpy(), pi_pred[:3].cpu().detach().numpy(), 
-                  target_addr, title, name, label1=r"$\pi_t$", label2=r"$\hat{\pi}_t$", ylabel=r"$\pi_t$")
+                  target_addr, title, name, label1=r"$\pi_t$", label2=r"$\hat{\pi}_t$", ylabel=r"$\pi_t$ and $\hat{pi}_t$")
 
 print("The L2 distance between pi on test data: ", 
           utils.L2distance(pi.view(B, -1, 1), pi_pred.cpu().view(B, -1, 1)))
@@ -121,6 +120,7 @@ print("The L2 (relative) distance between pi on test data: ",
           utils.L2distance(pi.view(B, -1, 1), pi_pred.cpu().view(B, -1, 1))/utils.L2distance(pi.view(B, -1, 1), torch.zeros(B, N, 1)))
 
 valid_utils = np.load(os.path.join(params_path, "valid_util_Invest.npy"))
-utils.plotUtil(valid_utils, (0.8, 1.1), benchmark_loss, target_addr, None, "valid_util")
+utils.plotUtil(valid_utils, (0.8, 1.1), benchmark_loss, target_addr, None, "valid_util", 
+               ins_loc=[0.55, 0.1, 0.25, 0.25], ins_ylim=(benchmark_loss-0.01, benchmark_loss+0.005))
 
 f.close()
