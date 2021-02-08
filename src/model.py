@@ -63,68 +63,7 @@ class Action(nn.Module):
         alpha = self.linear[-1](alpha)
         return alpha
 
-'''
-## search for constant EQ
-class Action1(nn.Module):
-    def __init__(self, args, mode):
-        """
-        input:
-            args.in_dim -- the dimension of (t, X_t)
-            args.neurons -- the size of hidden layers
-            args.out_dim -- the dimension of alpha
-        """
-        super(Action1, self).__init__()
-        indim = args.in_dim # type vector dimensions
-        self.linear = nn.ModuleList([nn.Linear(indim, args.neurons[0])])
-        for i in range(len(args.neurons)-1):
-            self.linear.append(nn.Linear(args.neurons[i], args.neurons[i+1]))
-        self.linear.append(nn.Linear(args.neurons[-1], args.out_dim))
-        self.mode = mode
-        
-        
-        
-    def forward(self, bm, cn, typeVec, m, initial):
-        """
-        input:
-            typeVec -- type vector
-            bm -- tensor(batch, N, dim), brownian increments
-            cn -- tensor(batch, N+1, dim), common noise
-            m -- tensor(batch, N+1, dim), mu from previous step
-            initial -- starting point
-        return:
-            tensor(batch, N+1, dim), generate paths of controlled SDE
-        """
-        device = bm.device
-        self.strategy = []
-        batch, N, _ = bm.size()
-        X = torch.zeros(batch, N+1, 2, device=device)
-        X[:, 0, 1:] = initial #torch.randn(batch, 1, device=device)
-        
-        self.mode.initialize(typeVec)
-        const_pi = self.one_step(typeVec)
-        
-        for i in range(1, N+1):
-            X[:, i, 0] = i/N
-            self.strategy.append(const_pi)
-            X[:, i, 1:] = self.mode.one_step_simulation(X[:, i-1, 1:], m[:, i-1],
-                                                         self.strategy[-1], bm[:, i-1],
-                                                         cn[:, i]-cn[:, i-1])
-        return X
-        
-    
-    def one_step(self, typeVec):
-        """
-        input:
-            typeVec -- type vector
-        return:
-            alpha -- torch.tensor(batch, dim), control
-        """
-        alpha = torch.relu(self.linear[0](typeVec))
-        for i in range(1, len(self.linear)-1):
-            alpha = torch.relu(self.linear[i](alpha))
-        alpha = self.linear[-1](alpha)
-        return alpha
-    '''
+
 
 ## search for nonconstant EQ
 class Action1(nn.Module):
@@ -281,8 +220,6 @@ class LossTotal(nn.Module):
         """
         input:
             mode -- which example we are running
-            w -- [cost weight, dist weight]
-            
         """
         super(LossTotal, self).__init__()
         self.mode = mode
@@ -297,7 +234,6 @@ class LossTotal(nn.Module):
             m -- torch.tensor(batch, N+1, dim), the distribution interaction 
                     process from last round simulation, for example \bar{m}_t in 
                     the case of SystemicRisk.
-            prevExpectSig -- previous expected signature
             strategy -- list[N]
         """
         N = len(strategy)
@@ -317,8 +253,6 @@ class LossTotal2(nn.Module):
         """
         input:
             mode -- which example we are running
-            w -- [cost weight, dist weight]
-            
         """
         super(LossTotal2, self).__init__()
         self.mode = mode
@@ -333,7 +267,6 @@ class LossTotal2(nn.Module):
             m -- torch.tensor(batch, N+1, dim), the distribution interaction 
                     process from last round simulation, for example \bar{m}_t in 
                     the case of SystemicRisk.
-            prevExpectSig -- previous expected signature
             strategy -- list[N]
         """
         N = len(strategy)
