@@ -203,29 +203,52 @@ def plotErrors(error, target_addr, title, filename):
     plt.plot(error, color='blue')
     fig.savefig(target_addr+'/'+filename+'.pdf')
     
-def plotUtil(util, ylim, ytrue, target_addr, title, filename, ins_loc=None, ins_ylim=None):
+def plotUtil(util, ylim, ytrue, target_addr, title, filename, ins_loc=None, ins_ylim=None, cost=False):
     
-    n = len(util)
-    fig, ax = plt.subplots(figsize=(7.5, 6))
-    if title:
-        plt.title(title)
-    if ylim:
-        ax.set_ylim(ylim)
-    ax.set_xlabel(r"FP iterations $n$")
-    ax.set_ylabel("validation utility")
-    l1 = ax.axhline(ytrue, color="indianred", ls="--")
-    l2, = ax.plot(util, color='darkcyan', ls="-")
-    if ins_loc:
-        axins = ax.inset_axes(ins_loc)
-    if ins_ylim:
-        axins.set_ylim(ins_ylim)
-    axins.plot(range(n-50, n), util[-50:], color='darkcyan', ls="-")
-    axins.axhline(ytrue, color="indianred", ls="--")
-    
-    ax.indicate_inset_zoom(axins)
-    ax.legend((l1, l2), ("true utility", "validation utility"), loc="upper center")
-    plt.tight_layout()
-    fig.savefig(target_addr+'/'+filename+'.pdf')
+    if cost:
+        n = len(util)
+        fig, ax = plt.subplots(figsize=(7.5, 6))
+        if title:
+            plt.title(title)
+        if ylim:
+            ax.set_ylim(ylim)
+        ax.set_xlabel(r"FP iterations $n$")
+        ax.set_ylabel("validation cost")
+        l1 = ax.axhline(ytrue, color="indianred", ls="--")
+        l2, = ax.plot(util, color='darkcyan', ls="-")
+        if ins_loc:
+            axins = ax.inset_axes(ins_loc)
+        if ins_ylim:
+            axins.set_ylim(ins_ylim)
+        axins.plot(range(n-50, n), util[-50:], color='darkcyan', ls="-")
+        axins.axhline(ytrue, color="indianred", ls="--")
+        
+        ax.indicate_inset_zoom(axins)
+        ax.legend((l1, l2), ("true cost", "validation cost"), loc="upper center")
+        plt.tight_layout()
+        fig.savefig(target_addr+'/'+filename+'.pdf')
+    else:
+        n = len(util)
+        fig, ax = plt.subplots(figsize=(7.5, 6))
+        if title:
+            plt.title(title)
+        if ylim:
+            ax.set_ylim(ylim)
+        ax.set_xlabel(r"FP iterations $n$")
+        ax.set_ylabel("validation utility")
+        l1 = ax.axhline(ytrue, color="indianred", ls="--")
+        l2, = ax.plot(util, color='darkcyan', ls="-")
+        if ins_loc:
+            axins = ax.inset_axes(ins_loc)
+        if ins_ylim:
+            axins.set_ylim(ins_ylim)
+        axins.plot(range(n-50, n), util[-50:], color='darkcyan', ls="-")
+        axins.axhline(ytrue, color="indianred", ls="--")
+        
+        ax.indicate_inset_zoom(axins)
+        ax.legend((l1, l2), ("true utility", "validation utility"), loc="upper center")
+        plt.tight_layout()
+        fig.savefig(target_addr+'/'+filename+'.pdf')
 
 
 
@@ -346,7 +369,7 @@ def plotC(benchmark, predicted, target_addr, title, filename, label1=None, label
     plt.tight_layout()
     fig.savefig(target_addr+'/'+filename+'.pdf')
     
-def plotpi(benchmark, predicted, target_addr, title, filename, label1=None, label2=None, ylabel=None, legendloc = None):
+def plotpi(benchmark, predicted, target_addr, title, filename, ylim = None, label1=None, label2=None, ylabel=None, legendloc = None):
     """
     input:
         benchmark -- list[paths]
@@ -355,6 +378,8 @@ def plotpi(benchmark, predicted, target_addr, title, filename, label1=None, labe
     fig = plt.figure()
     if title:
         plt.title(title)
+    if ylim:
+        plt.ylim(ylim)
     t = [i/100 for i in range(100)]
     c = len(benchmark)
     lines = []
