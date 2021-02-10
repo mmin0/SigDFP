@@ -69,10 +69,8 @@ def evaluate(model, dataloader, criterion, initial, prev_m, device, depth=4):
         loss = criterion(X, prev_m[i*dataloader.batch_size:(i+1)*dataloader.batch_size], strategy)
 
         epoch_loss += loss.item()
-        #m += torch.mean(X[:, :, 1:], dim=0)
-        #sigs += torch.mean(signatory.signature(X, depth, basepoint=True), dim=0)
         i+=1
-    return epoch_loss/len(dataloader)#, m/(len(dataloader)), sigs/(len(dataloader))
+    return epoch_loss/len(dataloader)
 
 
 
@@ -123,10 +121,9 @@ def evaluate1(model, dataloader, criterion, initial, prev_m, device, depth=4):
         loss = criterion(X, prev_m[i*dataloader.batch_size:(i+1)*dataloader.batch_size], strategy)
 
         epoch_loss += loss.item()
-        #m += torch.mean(X[:, :, 1:], dim=0)
-        #sigs += torch.mean(signatory.signature(X, depth, basepoint=True), dim=0)
+        
         i+=1
-    return epoch_loss/len(dataloader)#, m/(len(dataloader)), sigs/(len(dataloader))
+    return epoch_loss/len(dataloader)
 
 
 
@@ -189,10 +186,9 @@ def evaluate2(model, dataloader, criterion, initial, prev_m, prev_c, device, dep
                         strategy, prev_c[i*dataloader.batch_size:(i+1)*dataloader.batch_size])
         
         epoch_loss += loss.item()
-        #m += torch.mean(X[:, :, 1:], dim=0)
-        #sigs += torch.mean(signatory.signature(X, depth, basepoint=True), dim=0)
+        
         i+=1
-    return epoch_loss/len(dataloader)#, m/(len(dataloader)), sigs/(len(dataloader))
+    return epoch_loss/len(dataloader)
 
 
 def plotErrors(error, target_addr, title, filename):
@@ -320,27 +316,7 @@ def plotSDE(benchmark, predicted, target_addr, title, filename, ylim=None, label
     plt.tight_layout()
     fig.savefig(target_addr+'/'+filename+'.pdf')
     
-'''    
-def plotSDE_CI(benchmark, predicted, target_addr, title, filename):
-    """
-    input:
-        benchmark -- array[paths]
-        predicted -- array[paths]
-    """
-    fig = plt.figure()
-    plt.title(title)
-    N = benchmark.shape[1]
-    t_axis = [1/N*i for i in range(N)]
-    std = np.std(benchmark - predicted, axis=0).squeeze()
-    for i in range(3):
-        plt.plot(t_axis, benchmark[i], color='indianred', ls='-', label="benchmark")
-    
-    for i in range(3):
-        plt.plot(t_axis, predicted[i], color='grey', ls='--', label="predicted SDE")
-        plt.fill_between(t_axis, predicted[i].squeeze()-1.96*std, predicted[i].squeeze()+1.96*std, color='grey', alpha=0.1)
-    plt.legend()
-    fig.savefig(target_addr+'/'+filename+'SDE_CI.pdf')
-    '''
+
     
 def plotC(benchmark, predicted, target_addr, title, filename, label1=None, label2=None, ylabel=None):
     """
