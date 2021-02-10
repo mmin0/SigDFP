@@ -20,3 +20,4 @@ python3 SystemicRiskPlot.py --depth 2
 python3 InvestPlot.py --depth 2
 python3 InvestConsumpPlot.py --depth 4
 ```
+The depth should be the same as the depth for training.
