@@ -11,10 +11,14 @@ import sys
 import os
 import numpy as np
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--depth', type=int, help='signature depth', required=True)
+#parser.add_argument('--lower', type=int, help='plot lower bound', required=True)
+args = parser.parse_args()
 
 torch.manual_seed(21)
 
-device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 augment = signatory.Augment(1, 
                             layer_sizes = (), 
                             kernel_size = 1,
@@ -37,7 +41,7 @@ for i in range(1, N+1):
 initial_generator = torch.rand
 initial = initial_generator(B, 1)
 
-depth = 4
+depth = args.depth
 rough_w0 = signatory.Path(augment(w0), depth, basepoint=False) # rough path
 
 dic = {"in_dim": 6, "out_dim":2, "neurons":[64, 64, 64]}
@@ -101,8 +105,12 @@ print("The L2 (relative) distance between controlled SDE on test data: ",
           utils.L2distance(benchmark, X[:, :, 1:].cpu())/utils.L2distance(benchmark, torch.zeros(B, N+1, 1)))
 title = None
 name = "SDE"
-utils.plotSDE(benchmark[:3].cpu().detach().numpy(), X[:3, :, 1:].cpu().detach().numpy(),
-                  target_addr, title, name, label1=r"$X_t$", label2=r"$\hat{X}_t$")
+
+d = 8#93#args.lower
+u = d+3
+
+utils.plotSDE(benchmark[d:u].cpu().detach().numpy(), X[d:u, :, 1:].cpu().detach().numpy(),
+                  target_addr, title, name, ylim=(None, 0.6), label1=r"$X_t$", label2=r"$\widehat{X}_t$", legendloc="upper center")
 
 #utils.plotSDE_CI(benchmark.cpu().detach().numpy(), X[:, :, 1:].cpu().detach().numpy(),
 #                  target_addr, title, name)
@@ -116,15 +124,15 @@ print("The L2 (relative) distance between cost c on test data: ",
           utils.L2distance(benchmark_c, ctest.cpu().view(B, -1, 1))/utils.L2distance(benchmark_c, torch.zeros(B, N, 1)))
           #/utils.L2distance(benchmark_test_c, torch.zeros(benchmark_test_c.size()))
 title = None
-utils.plotC(benchmark_c[:3].cpu().detach().numpy(), ctest[:3].cpu().detach().numpy(), 
-                  target_addr, title, "c", label1 = r"$c_t$", label2=r"$\hat{c}_t$",
-                  ylabel=r"$c_t$")
+utils.plotC(benchmark_c[d:u].cpu().detach().numpy(), ctest[d:u].cpu().detach().numpy(), 
+                  target_addr, title, "c", label1 = r"$c_t$", label2=r"$\widehat{c}_t$",
+                  ylabel=r"$c_t$ and $\widehat{c}_t$")
     
 title = None
 name = "Gamma"
-utils.plotmC(benchmark_mc.view(N, -1).cpu().detach().numpy(), mc[:3].cpu().detach().numpy(), 
-                  target_addr, None, name, label1 = r"$\Gamma_t$", label2=r"$\hat{\Gamma}_t$",
-                  ylabel=r"$\Gamma_t$")
+utils.plotmC(benchmark_mc.view(N, -1).cpu().detach().numpy(), mc[d:u].cpu().detach().numpy(), 
+                  target_addr, None, name, label1 = r"$\Gamma_t$", label2=r"$\widehat{\Gamma}_t$",
+                  ylabel=r"$\Gamma_t$ and $\widehat{\Gamma}_t$")
 
 gm = torch.cat([benchmark_mc.cpu().detach().view(1, N, -1) for i in range(B)], dim=0)
 print("The L2 distance between gamma on test data: ", 
@@ -137,11 +145,11 @@ print("The L2 (relative) distance between gamma on test data: ",
 #title = "Xbar_t on test data"
 #utils.plotmC(benchmark_test_mc.view(N, -1).cpu().detach().numpy(), mc_test[:5].cpu().detach().numpy(), 
 #              target_addr, title, name)
-utils.plotMeanDiff_bencmarkvspredicted([[i/N for i in range(N+1)], benchmark_m[:3, :].cpu().detach().numpy(),
-                        m[:3, :].cpu().detach().numpy()],
+utils.plotMeanDiff_bencmarkvspredicted([[i/N for i in range(N+1)], benchmark_m[d:u, :].cpu().detach().numpy(),
+                        m[d:u, :].cpu().detach().numpy()],
                         target_addr, 
-                        None, 'Xbar', label1=r"$m_t$", label2=r"$\hat{m}_t$",
-                        ylabel=r"$m_t$")
+                        None, 'Xbar', ylim=(None, 0.5),label1=r"$m_t$", label2=r"$\widehat{m}_t$",
+                        ylabel=r"$m_t$ and $\widehat{m}_t$", legendloc="upper center")
 print("The L2 distance between Xbar on test data: ", 
           utils.L2distance(benchmark_m.view(B, -1, 1), m.cpu().view(B, -1, 1)))
 print("The L2 (relative) distance between Xbar on test data: ", 
@@ -155,15 +163,18 @@ print("The L2 (relative) distance between pi on test data: ",
           utils.L2distance(pi.view(B, -1, 1), ptest.cpu().view(B, -1, 1))/utils.L2distance(pi.view(B, -1, 1), torch.zeros(B, N, 1)))
 title = None
 name = "pi"
-utils.plotpi(pi[:3].cpu().detach().numpy(), ptest[:3].cpu().detach().numpy(), 
-                  target_addr, title, name, label1=r"$\pi_t$", label2=r"$\hat{\pi}_t$", ylabel=r"$\pi_t$")
+utils.plotpi(pi[d:u].cpu().detach().numpy(), ptest[d:u].cpu().detach().numpy(), 
+                  target_addr, title, name, ylim=(None, 7), label1=r"$\pi_t$", label2=r"$\widehat{\pi}_t$", 
+                  ylabel=r"$\pi_t$ and $\widehat{\pi}_t$", legendloc="upper center")
 
 valid_utils = np.load(os.path.join(params_path, "valid_util_InvestConsumption.npy"))
-utils.plotUtil(valid_utils, (1.6, 2.8), benchmark_loss, target_addr, None, "valid_util")
-#### also plot test loss in this plot.
-f.close()
-    
+utils.plotUtil(valid_utils, (2.0, 3.0), 2.5861, target_addr, None, "valid_util", 
+               ins_loc=[0.55, 0.2, 0.35, 0.2], ins_ylim=(2.5861-0.01, 2.5861+0.03))
 
+#### also plot test loss in this plot.
+
+
+f.close()
     
 
 
