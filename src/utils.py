@@ -8,6 +8,10 @@ from matplotlib.legend_handler import HandlerTuple
 from matplotlib.ticker import FormatStrFormatter
 #from tqdm import tqdm
 
+matplotlib.rcParams['pdf.fonttype'] = 42
+matplotlib.rcParams['ps.fonttype'] = 42
+
+
 plt.rc('xtick', labelsize=22)    # fontsize of the tick labels
 plt.rc('ytick', labelsize=22)
 plt.rc('legend', fontsize=25) 
