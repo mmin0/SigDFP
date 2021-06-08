@@ -1,6 +1,7 @@
 # SigDFP
 Signatured Deep Fictitious Play for Mean Field Games with Common Noises
-![figure](algoGraph.png)
+
+![figure](algoGraph.png =600x600)
 
 ## Installment
 ```
